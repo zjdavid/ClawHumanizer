@@ -1,0 +1,152 @@
+{
+    "id": "claw-humanizer",
+    "name": "Claw Humanizer",
+    "description": "Simulates human-like message timing with dynamic delay modes and chunked outbound sending",
+    "configSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "enabled": {
+                "type": "boolean",
+                "default": true
+            },
+            "inbound": {
+                "type": "object",
+                "properties": {
+                    "idleThreshold": {
+                        "type": "number",
+                        "default": 600000
+                    },
+                    "attention": {
+                        "type": "object",
+                        "properties": {
+                            "minDelay": {
+                                "type": "number",
+                                "default": 2000
+                            },
+                            "maxDelay": {
+                                "type": "number",
+                                "default": 10000
+                            }
+                        }
+                    },
+                    "awake": {
+                        "type": "object",
+                        "properties": {
+                            "minDelay": {
+                                "type": "number",
+                                "default": 10000
+                            },
+                            "maxDelay": {
+                                "type": "number",
+                                "default": 300000
+                            }
+                        }
+                    },
+                    "sleep": {
+                        "type": "object",
+                        "properties": {
+                            "autoReplyText": {
+                                "type": "string",
+                                "default": "我已经睡了，连发三条消息可以唤醒我"
+                            },
+                            "wakeUpCount": {
+                                "type": "number",
+                                "default": 3
+                            }
+                        }
+                    },
+                    "schedule": {
+                        "type": "object",
+                        "properties": {
+                            "awakeStart": {
+                                "type": "string",
+                                "default": "08:00"
+                            },
+                            "awakeEnd": {
+                                "type": "string",
+                                "default": "23:00"
+                            },
+                            "timezone": {
+                                "type": "string",
+                                "default": "Asia/Shanghai"
+                            }
+                        }
+                    }
+                }
+            },
+            "outbound": {
+                "type": "object",
+                "properties": {
+                    "charsPerChunk": {
+                        "type": "number",
+                        "default": 80
+                    },
+                    "delayPerChar": {
+                        "type": "number",
+                        "default": 50
+                    },
+                    "chunkDelay": {
+                        "type": "number",
+                        "default": 1500
+                    },
+                    "maxChunks": {
+                        "type": "number",
+                        "default": 10
+                    }
+                }
+            }
+        }
+    },
+    "uiHints": {
+        "enabled": {
+            "label": "Enable Humanizer"
+        },
+        "inbound.idleThreshold": {
+            "label": "Idle Threshold (ms)",
+            "placeholder": "600000"
+        },
+        "inbound.attention.minDelay": {
+            "label": "Attention Min Delay (ms)"
+        },
+        "inbound.attention.maxDelay": {
+            "label": "Attention Max Delay (ms)"
+        },
+        "inbound.awake.minDelay": {
+            "label": "Awake Min Delay (ms)"
+        },
+        "inbound.awake.maxDelay": {
+            "label": "Awake Max Delay (ms)"
+        },
+        "inbound.sleep.autoReplyText": {
+            "label": "Sleep Auto-Reply Text"
+        },
+        "inbound.sleep.wakeUpCount": {
+            "label": "Messages to Wake Up"
+        },
+        "inbound.schedule.awakeStart": {
+            "label": "Awake Start Time",
+            "placeholder": "08:00"
+        },
+        "inbound.schedule.awakeEnd": {
+            "label": "Awake End Time",
+            "placeholder": "23:00"
+        },
+        "inbound.schedule.timezone": {
+            "label": "Timezone",
+            "placeholder": "Asia/Shanghai"
+        },
+        "outbound.charsPerChunk": {
+            "label": "Chars Per Chunk"
+        },
+        "outbound.delayPerChar": {
+            "label": "Delay Per Char (ms)"
+        },
+        "outbound.chunkDelay": {
+            "label": "Chunk Delay (ms)"
+        },
+        "outbound.maxChunks": {
+            "label": "Max Chunks"
+        }
+    }
+}

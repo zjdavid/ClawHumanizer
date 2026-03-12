@@ -1,0 +1,30 @@
+{
+  "name": "claw-humanizer",
+  "version": "1.0.0",
+  "description": "OpenClaw plugin that simulates human-like message timing with dynamic inbound delays and chunked outbound sending",
+  "main": "src/index.ts",
+  "type": "module",
+  "openclaw": {
+    "extensions": [
+      "src/index.ts"
+    ]
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "openclaw",
+    "plugin",
+    "humanizer",
+    "delay",
+    "typing"
+  ],
+  "author": "DavidZJ",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^3.0.0"
+  }
+}
