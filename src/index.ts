@@ -1,5 +1,10 @@
 // ─── Claw Humanizer — Plugin Entry Point ────────────────────────
 // Makes AI responses feel human: dynamic inbound delays + chunked outbound.
+//
+// COMPATIBILITY: OpenClaw 2026.3.x
+//   - Inbound: api.on("message_received") — reliable for all channels
+//   - Outbound: api.on("before_prompt_build") for prompt injection (reliable)
+//             + api.on("message_sending") as best-effort fallback
 
 import type { HumanizerConfig } from "./types.js";
 import { DEFAULT_CONFIG } from "./types.js";
@@ -15,15 +20,17 @@ export default function register(api: any): void {
     const stateManager = new StateManager();
 
     // ─── Config resolver ──────────────────────────────────────────
+    // Merges user config with defaults so all fields are guaranteed present.
     const getConfig = (): HumanizerConfig => {
         const raw = api.config ?? {};
         return deepMerge(DEFAULT_CONFIG, raw) as HumanizerConfig;
     };
 
-    // ─── 1. Register inbound delay ────────────────────────────────
+    // ─── 1. Register inbound delay (message_received hook) ────────
     registerInboundQueue(api, stateManager, getConfig);
 
     // ─── 2. Register outbound chunked sender ──────────────────────
+    //    Uses before_prompt_build (reliable) + message_sending (best-effort)
     registerOutboundSender(api, getConfig);
 
     // ─── 3. Register /humanizer command ───────────────────────────
@@ -63,7 +70,7 @@ export default function register(api: any): void {
                         `**Awake delay:** ${config.inbound.awake.minDelay / 1000}–${config.inbound.awake.maxDelay / 1000}s`,
                         `**Sleep wake count:** ${config.inbound.sleep.wakeUpCount} messages`,
                         "",
-                        `**Outbound:** ${config.outbound.charsPerChunk} chars/chunk, ${config.outbound.maxChunks} max chunks`,
+                        `**Outbound:** prompt injection + best-effort chunking`,
                     ];
 
                     if (senderCount > 0) {

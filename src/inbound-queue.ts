@@ -1,6 +1,11 @@
 // ─── Inbound Queue ──────────────────────────────────────────────
-// Intercepts inbound messages via the "before_prompt_build" hook
+// Intercepts inbound messages via "message_received" lifecycle hook
 // and applies dynamic delay based on sender state.
+//
+// COMPATIBILITY NOTE (OpenClaw 2026.3.x):
+//   - Uses api.on("message_received") which fires reliably for all
+//     inbound message paths (Telegram, WhatsApp, Webchat, etc.)
+//   - Does NOT use api.registerHook() which has known reliability issues
 
 import type { HumanizerConfig } from "./types.js";
 import { sleep } from "./delay-engine.js";
@@ -9,30 +14,34 @@ import { StateManager } from "./state-manager.js";
 /**
  * Registers the inbound delay logic on the given plugin API.
  *
- * @param api  - OpenClaw plugin API object
- * @param stateManager - shared state manager instance
- * @param getConfig - function that returns the current config (supports hot reload)
+ * Uses two hooks:
+ * 1. "message_received" — applies delay or auto-reply BEFORE agent processes
+ * 2. "before_prompt_build" — injects chunking instructions into system prompt
  */
 export function registerInboundQueue(
     api: any,
     stateManager: StateManager,
     getConfig: () => HumanizerConfig,
 ): void {
+    // ─── Hook 1: Inbound message delay ───────────────────────────
+    // "message_received" fires when a message arrives from any channel.
+    // We apply delay here to simulate "read but haven't replied yet".
     api.on(
-        "before_prompt_build",
-        async (_event: any, ctx: any) => {
+        "message_received",
+        async (event: any, ctx: any) => {
             const config = getConfig();
             if (!config.enabled) return;
 
-            const senderId: string = ctx?.senderId ?? "unknown";
+            const senderId: string =
+                event?.senderId ?? ctx?.senderId ?? event?.from ?? "unknown";
             const action = stateManager.onMessage(senderId, config);
 
             switch (action.action) {
                 case "auto-reply":
-                    // Return an auto-reply and skip agent processing
                     api.logger?.info?.(
-                        `[humanizer] 🌙 Sleep auto-reply to ${senderId}: "${action.text}"`,
+                        `[humanizer] 🌙 Sleep auto-reply to ${senderId}`,
                     );
+                    // Return auto-reply payload to skip agent processing
                     return {
                         skipAgent: true,
                         reply: action.text,
@@ -53,6 +62,6 @@ export function registerInboundQueue(
                     break;
             }
         },
-        { priority: 100 }, // Run early to apply delay before other hooks
+        { priority: 100 }, // Run early so delay happens before agent
     );
 }
